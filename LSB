@@ -1,0 +1,36 @@
+
+clc
+clear all;
+close all;
+
+file_name='cityu-logo.png';
+cover_object=imread(file_name);
+
+file_name='watermark.bmp';
+message=imread(file_name);
+message=double(message);
+message=round(message./256);
+message=uint8(message);
+
+Mc=size(cover_object,1);
+Nc=size(cover_object,2);
+
+Mm=size(message,1);
+Nm=size(message,2);
+% Expand the watermark to the size of the original image and write watermark
+for ii = 1:Mc
+    for jj = 1:Nc
+        watermark(ii,jj)=message(mod(ii, Mm)+1,mod(jj, Nm)+1);
+    end
+end
+% Change the least significant value of the original image to the value of the watermark
+watermarked_image=cover_object;
+for ii = 1:Mc
+   for jj = 1:Nc
+       watermarked_image(ii, jj)=bitset(watermarked_image(ii, jj), 1, watermark(ii ,jj));
+   end 
+end
+imwrite(watermarked_image,'D:\\港城\\视觉与图像\\Project\\LSB-watermark embedded image.bmp','bmp');
+
+figure(2);
+imshow(watermarked_image,[]);
