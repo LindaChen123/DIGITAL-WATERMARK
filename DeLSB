@@ -1,0 +1,40 @@
+
+clc
+clear all;
+close all;
+
+file_name='LSBattacked10.bmp';
+watermarked_image=imread(file_name);
+Mw =size(watermarked_image,1);
+Nw =size(watermarked_image,2);
+
+file_name='watermark.bmp';
+orig_watermark=imread(file_name);
+
+message_pad=double(orig_watermark);
+message_pad=round(message_pad./256);
+message_pad=uint8(message_pad);
+
+
+Mm=size(orig_watermark,1);	       
+Nm=size(orig_watermark,2);	        
+
+% The lowest significant bit of the embedded watermark image is used to reconstruct the watermark
+for ii = 1:Mw
+   for jj = 1:Nw
+       watermark(ii, jj)=bitget(watermarked_image(ii, jj),1);
+   end
+end
+watermark=256*double(watermark);
+
+%Change the extracted watermark to the original watermark size
+for ii = 1:Mm-1
+    for jj = 1:Nm-1
+        watermark1(ii+1,jj+1)=watermark(ii,jj);
+    end
+end
+watermark1(1,1)=watermark(Mm,Nm);
+
+imshow(watermark1,[]);
+title('Recovered Watermark');
+imwrite(watermark1,'LSBattacked10-recovery.bmp','bmp');
