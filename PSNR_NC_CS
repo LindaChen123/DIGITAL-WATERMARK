@@ -1,0 +1,71 @@
+
+from PIL import Image
+from numpy import average, linalg, dot
+import math
+import numpy as np
+import cv2
+
+def calculate_psnr(img1, img2):
+    # img1 and img2 have range [0, 255]
+    img1 = img1.astype(np.float64)
+    img2 = img2.astype(np.float64)
+    mse = np.mean((img1 - img2)**2)
+    if mse == 0:
+        return float('inf')
+    return 20 * math.log10(255.0 / math.sqrt(mse))
+
+# def get_thumbnail(image, size=(1200, 750), greyscale=False):
+#     image = image.resize(size, Image.ANTIALIAS)
+#     if greyscale:
+#         image = image.convert('L')
+#     return image
+def compute_nc(image1, image2):
+    # 将图像转换为浮点数类型
+    img1 = image1.astype(float)
+    img2 = image2.astype(float)
+
+    # 计算图像的均值
+    mean_img1 = np.mean(img1)
+    mean_img2 = np.mean(img2)
+
+    # 计算图像的方差
+    var_img1 = np.var(img1)
+    var_img2 = np.var(img2)
+
+    # 计算归一化交叉相关值
+    numerator = np.mean((img1 - mean_img1) * (img2 - mean_img2))
+    denominator = np.sqrt(var_img1 * var_img2)
+    NC_value = numerator / denominator
+
+    return NC_value
+
+def image_similarity_vectors_via_numpy(image1, image2):
+    # image1 = get_thumbnail(image1)
+    # image2 = get_thumbnail(image2)
+    images = [image1, image2]
+    vectors = []
+    norms = []
+    for image in images:
+        vector = []
+        for pixel_tuple in image.getdata():
+            vector.append(average(pixel_tuple))
+        vectors.append(vector)
+        norms.append(linalg.norm(vector, 2))
+    a, b = vectors
+    a_norm, b_norm = norms
+    res = dot(a / a_norm, b / b_norm)
+    return res
+
+origin_watermark = "D:\Project\\watermark.bmp"
+recover_watermark = "D:\Project\\DCTattacked10-recovery.bmp"
+
+img1=cv2.imread(origin_watermark)
+img2=cv2.imread(recover_watermark)
+image1 = Image.open(origin_watermark)
+image2 = Image.open(recover_watermark)
+psnr=calculate_psnr(img1,img2)
+cosin = image_similarity_vectors_via_numpy(image1, image2)
+nc_value = compute_nc(img1,img2)
+print("psnr",psnr)
+print("cosin",cosin)
+print("nc",nc_value)
