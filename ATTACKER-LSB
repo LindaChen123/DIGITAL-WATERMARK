@@ -1,0 +1,92 @@
+clc
+clear all;
+
+%attacker1:White noise
+I = imread('D:\\港城\\视觉与图像\\Project\\LSB-watermark embedded image.bmp');
+Aimage1=I;
+Wnoise=uint8(20*randn(size(Aimage1)));%Wnoise=20*randn(size(Aimage1),'like',wimage);
+Aimage1=Aimage1+Wnoise;
+subplot(2,5,1),imshow(Aimage1,[]),title('Gaussian white noise');
+imwrite(Aimage1,'D:\\港城\\视觉与图像\\Project\\LSBattacked1.bmp','bmp');
+ 
+%attacker2:Gaussian low-pass filtering 
+Aimage2=I;
+H=fspecial('gaussian',[4,4],0.5);
+Aimage2=imfilter(Aimage2,H);
+subplot(2,5,2),imshow(Aimage2,[]),title('Gaussian low pass filter');
+imwrite(Aimage2,'D:\\港城\\视觉与图像\\Project\\LSBattacked2.bmp','bmp');
+
+%attacker3:Shear attack
+Aimage3=I;
+image_size=size(I);
+dimension = numel(image_size); 
+if dimension == 3
+    Aimage3_r = Aimage3(:,:,1);
+    Aimage3_r(1:100,1:100)=256;
+    Aimage3_g = Aimage3(:,:,2);
+    Aimage3_g(1:100,1:100)=256;
+    Aimage3_b = Aimage3(:,:,3);
+    Aimage3_b(1:100,1:100)=256;
+    
+    Aimage3(:,:,1) = Aimage3_r;
+    Aimage3(:,:,2) = Aimage3_g;
+    Aimage3(:,:,3) = Aimage3_b;
+end
+% grey image
+if dimension == 2
+    Aimage3(1:1128,1:1128)=256;
+end
+subplot(2,5,3),imshow(Aimage3,[]),title('Cutting');
+imwrite(Aimage3,'D:\\港城\\视觉与图像\\Project\\LSBattacked3.bmp','bmp');
+ 
+%attacker4:Spin attack
+Aimage4=I;
+Aimage4=imrotate(Aimage4,10,'bilinear','crop');
+Aimage_4=mat2gray(Aimage4);
+subplot(2,5,4),imshow(Aimage_4,[]),title('Rotation');
+imwrite(Aimage4,'D:\\港城\\视觉与图像\\Project\\LSBattacked4.bmp','bmp');
+ 
+ %attacker5:Salt-and-pepper noise
+Aimage5=I;
+Aimage5=imnoise(Aimage5,'salt & pepper',0.01);
+subplot(2,5,5),imshow(Aimage5,[]),title('salt & pepper');
+imwrite(Aimage5,'D:\\港城\\视觉与图像\\Project\\LSBattacked5.bmp','bmp');
+
+%attacker6:Poisson noise
+Aimage6=I;
+Aimage6=imnoise(Aimage6,'poisson');
+subplot(2,5,6),imshow(Aimage6,[]),title('poisson');
+imwrite(Aimage6,'D:\\港城\\视觉与图像\\Project\\LSBattacked6.bmp','bmp');
+
+%attacker7:Speckle noise
+Aimage7=I;
+Aimage7=imnoise(Aimage7,'speckle');
+subplot(2,5,7),imshow(Aimage7,[]),title('speckle');
+imwrite(Aimage7,'D:\\港城\\视觉与图像\\Project\\LSBattacked7.bmp','bmp');
+
+%attacker8:Amplify
+Aimage8=I;
+Aimage8=imresize(Aimage8,2);
+subplot(2,5,8),imshow(Aimage8,[]),title('amplify');
+imwrite(Aimage8,'D:\\港城\\视觉与图像\\Project\\LSBattacked8.bmp','bmp');
+
+%attacker9:Shrink
+Aimage9=I;
+Aimage9=imresize(Aimage9,0.5);
+subplot(2,5,9),imshow(Aimage9,[]),title('shrink');
+imwrite(Aimage9,'D:\\港城\\视觉与图像\\Project\\LSBattacked9.bmp','bmp');
+
+%attacker10:Compress
+Aimage10=I;
+[cA1,cH1,cV1,cD1]=dwt2(Aimage10,'Haar');    %The image is compressed by wavelet transform
+cA1=compress(cA1);
+cH1=compress(cH1);
+cV1=compress(cV1);
+cD1=compress(cD1);
+result=idwt2(cA1,cH1,cV1,cD1,'Haar');
+result=uint8(result);
+Aimage10 = result;
+subplot(2,5,10),imshow(Aimage10,[]),title('compress');
+imwrite(Aimage10, 'D:\\港城\\视觉与图像\\Project\\LSBattacked10.bmp', 'bmp');
+
+
